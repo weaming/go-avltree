@@ -2,49 +2,55 @@ package avltree
 
 import (
 	"fmt"
+
+	"golang.org/x/exp/constraints"
 )
 
-// AVLTree structure. Public methods are Add, Remove, Update, Search, DisplayTreeInOrder.
-type AVLTree struct {
-	root *AVLNode
+type Num interface {
+	constraints.Ordered
 }
 
-func (t *AVLTree) Add(key int, value int) {
+// AVLTree structure. Public methods are Add, Remove, Update, Search, DisplayTreeInOrder.
+type AVLTree[K Num, V any] struct {
+	root *AVLNode[K, V]
+}
+
+func (t *AVLTree[K, V]) Add(key K, value V) {
 	t.root = t.root.add(key, value)
 }
 
-func (t *AVLTree) Remove(key int) {
+func (t *AVLTree[K, V]) Remove(key K) {
 	t.root = t.root.remove(key)
 }
 
-func (t *AVLTree) Update(oldKey int, newKey int, newValue int) {
+func (t *AVLTree[K, V]) Update(oldKey K, newKey K, newValue V) {
 	t.root = t.root.remove(oldKey)
 	t.root = t.root.add(newKey, newValue)
 }
 
-func (t *AVLTree) Search(key int) (node *AVLNode) {
+func (t *AVLTree[K, V]) Search(key K) (node *AVLNode[K, V]) {
 	return t.root.search(key)
 }
 
-func (t *AVLTree) DisplayInOrder() {
+func (t *AVLTree[K, V]) DisplayInOrder() {
 	t.root.displayNodesInOrder()
 }
 
 // AVLNode structure
-type AVLNode struct {
-	key   int
-	Value int
+type AVLNode[K Num, V any] struct {
+	key   K
+	Value V
 
 	// height counts nodes (not edges)
 	height int
-	left   *AVLNode
-	right  *AVLNode
+	left   *AVLNode[K, V]
+	right  *AVLNode[K, V]
 }
 
 // Adds a new node
-func (n *AVLNode) add(key int, value int) *AVLNode {
+func (n *AVLNode[K, V]) add(key K, value V) *AVLNode[K, V] {
 	if n == nil {
-		return &AVLNode{key, value, 1, nil, nil}
+		return &AVLNode[K, V]{key, value, 1, nil, nil}
 	}
 
 	if key < n.key {
@@ -59,7 +65,7 @@ func (n *AVLNode) add(key int, value int) *AVLNode {
 }
 
 // Removes a node
-func (n *AVLNode) remove(key int) *AVLNode {
+func (n *AVLNode[K, V]) remove(key K) *AVLNode[K, V] {
 	if n == nil {
 		return nil
 	}
@@ -93,7 +99,7 @@ func (n *AVLNode) remove(key int) *AVLNode {
 }
 
 // Searches for a node
-func (n *AVLNode) search(key int) *AVLNode {
+func (n *AVLNode[K, V]) search(key K) *AVLNode[K, V] {
 	if n == nil {
 		return nil
 	}
@@ -107,7 +113,7 @@ func (n *AVLNode) search(key int) *AVLNode {
 }
 
 // Displays nodes left-depth first (used for debugging)
-func (n *AVLNode) displayNodesInOrder() {
+func (n *AVLNode[K, V]) displayNodesInOrder() {
 	if n.left != nil {
 		n.left.displayNodesInOrder()
 	}
@@ -117,19 +123,19 @@ func (n *AVLNode) displayNodesInOrder() {
 	}
 }
 
-func (n *AVLNode) getHeight() int {
+func (n *AVLNode[K, V]) getHeight() int {
 	if n == nil {
 		return 0
 	}
 	return n.height
 }
 
-func (n *AVLNode) recalculateHeight() {
+func (n *AVLNode[K, V]) recalculateHeight() {
 	n.height = 1 + max(n.left.getHeight(), n.right.getHeight())
 }
 
 // Checks if node is balanced and rebalance
-func (n *AVLNode) rebalanceTree() *AVLNode {
+func (n *AVLNode[K, V]) rebalanceTree() *AVLNode[K, V] {
 	if n == nil {
 		return n
 	}
@@ -154,7 +160,7 @@ func (n *AVLNode) rebalanceTree() *AVLNode {
 }
 
 // Rotate nodes left to balance node
-func (n *AVLNode) rotateLeft() *AVLNode {
+func (n *AVLNode[K, V]) rotateLeft() *AVLNode[K, V] {
 	newRoot := n.right
 	n.right = newRoot.left
 	newRoot.left = n
@@ -165,7 +171,7 @@ func (n *AVLNode) rotateLeft() *AVLNode {
 }
 
 // Rotate nodes right to balance node
-func (n *AVLNode) rotateRight() *AVLNode {
+func (n *AVLNode[K, V]) rotateRight() *AVLNode[K, V] {
 	newRoot := n.left
 	n.left = newRoot.right
 	newRoot.right = n
@@ -176,7 +182,7 @@ func (n *AVLNode) rotateRight() *AVLNode {
 }
 
 // Finds the smallest child (based on the key) for the current node
-func (n *AVLNode) findSmallest() *AVLNode {
+func (n *AVLNode[K, V]) findSmallest() *AVLNode[K, V] {
 	if n.left != nil {
 		return n.left.findSmallest()
 	} else {

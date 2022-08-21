@@ -12,7 +12,7 @@ const (
 )
 
 func TestTree(t *testing.T) {
-	tree := &AVLTree{}
+	tree := &AVLTree[int, int]{}
 	m := make(map[int]int)
 
 	const maxKey = 100
